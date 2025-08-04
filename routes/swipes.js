@@ -1,16 +1,15 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET all users */
+/* GET all swipes */
 router.get('/', function(req, res, next) {
-  const data = []; // Placeholder: will fetch users later with Prisma
+  const data = []; // Placeholder
   res.json(data);
 });
 
-/* POST create a new user + profile */
+/* POST new swipe */
 router.post('/', (req, res, next) => {
-  res.send("User + profile created (placeholder)");
+  res.send("Swipe recorded (placeholder)");
 });
 
 module.exports = router;
-
