@@ -18,12 +18,12 @@ router.post('/', async (req, res, next) => {
   try {
     const { swiper_id, swiped_id, is_like } = req.body;
 
-    // ✅ Prevent self-swiping
+    // Prevent self-swiping
     if (swiper_id === swiped_id) {
       return res.status(400).json({ error: "Cannot swipe yourself." });
     }
 
-    // ✅ Prevent duplicate swipes
+    // Prevent duplicate swipes
     const existingSwipe = await prisma.swipes.findUnique({
       where: {
         swiper_id_swiped_id: {
@@ -37,7 +37,7 @@ router.post('/', async (req, res, next) => {
       return res.status(409).json({ error: "Swipe already exists." });
     }
 
-    // ✅ Save the new swipe
+    // Save the new swipe
     const newSwipe = await prisma.swipes.create({
       data: {
         swiper_id,
@@ -46,7 +46,7 @@ router.post('/', async (req, res, next) => {
       }
     });
 
-    // ✅ If it's a like, check for a mutual like
+    // If it's a like, check for a mutual like
     if (is_like) {
       const reverseSwipe = await prisma.swipes.findUnique({
         where: {
@@ -58,7 +58,7 @@ router.post('/', async (req, res, next) => {
       });
 
       if (reverseSwipe && reverseSwipe.is_like) {
-        // ✅ Prevent duplicate matches
+        // Prevent duplicate matches
         const existingMatch = await prisma.matches.findUnique({
           where: {
             user1_id_user2_id: {

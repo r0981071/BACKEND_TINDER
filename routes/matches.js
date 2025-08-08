@@ -3,21 +3,25 @@ const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-router.get('/', async (req, res, next) => {
+// GET all matches for a user
+router.get('/:userId', async (req, res, next) => {
   try {
-    const matches = await prisma.matches.findMany();
+    const userId = parseInt(req.params.userId);
+
+    const matches = await prisma.matches.findMany({
+      where: {
+        OR: [
+          { user1_id: userId },
+          { user2_id: userId }
+        ]
+      }
+    });
+
     res.json(matches);
   } catch (error) {
     next(error);
   }
 });
 
-router.post('/', async (req, res, next) => {
-  try {
-    res.send("Match created (placeholder)");
-  } catch (error) {
-    next(error);
-  }
-});
+module.exports = router;  
 
-module.exports = router;
