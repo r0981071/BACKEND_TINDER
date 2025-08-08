@@ -11,12 +11,16 @@ model conversations {
   conversation_id Int @id @default(autoincrement()) @db.UnsignedInt
   user1_id        Int
   user2_id        Int
+
+  @@unique([user1_id, user2_id], map: "unique_conversation")
 }
 
 model matches {
   match_id Int @id @default(autoincrement()) @db.UnsignedInt
   user1_id Int
   user2_id Int
+
+  @@unique([user1_id, user2_id], map: "unique_match")
 }
 
 model messages {
@@ -45,6 +49,8 @@ model swipes {
   swiper_id Int
   swiped_id Int
   is_like   Boolean
+
+  @@unique([swiper_id, swiped_id], map: "unique_swipe")
 }
 
 model user {
