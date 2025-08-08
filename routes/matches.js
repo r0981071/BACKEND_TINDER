@@ -1,15 +1,23 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-/* GET all matches */
-router.get('/', function(req, res, next) {
-  const data = []; // Placeholder
-  res.json(data);
+router.get('/', async (req, res, next) => {
+  try {
+    const matches = await prisma.matches.findMany();
+    res.json(matches);
+  } catch (error) {
+    next(error);
+  }
 });
 
-/* POST new match (manual or future auto-trigger) */
-router.post('/', (req, res, next) => {
-  res.send("Match created (placeholder)");
+router.post('/', async (req, res, next) => {
+  try {
+    res.send("Match created (placeholder)");
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

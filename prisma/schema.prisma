@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model conversations {
+  conversation_id Int @id @default(autoincrement()) @db.UnsignedInt
+  user1_id        Int
+  user2_id        Int
+}
+
+model matches {
+  match_id Int @id @default(autoincrement()) @db.UnsignedInt
+  user1_id Int
+  user2_id Int
+}
+
+model messages {
+  message_id      Int    @id @default(autoincrement()) @db.UnsignedInt
+  conversation_id Int
+  sender_id       Int
+  receiver_id     Int
+  content         String @db.VarChar(255)
+}
+
+model profile {
+  profile_id      Int     @id @default(autoincrement()) @db.UnsignedInt
+  name            String  @db.VarChar(255)
+  gender_male     Boolean
+  age             Int
+  nationallity    String  @db.VarChar(255)
+  height          Float
+  weight          Float
+  bio             String  @db.VarChar(255)
+  profile_pic_url String? @db.VarChar(255)
+  user            user    @relation(fields: [profile_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "profile_ibfk_1")
+}
+
+model swipes {
+  swipe_id  Int     @id @default(autoincrement()) @db.UnsignedInt
+  swiper_id Int
+  swiped_id Int
+  is_like   Boolean
+}
+
+model user {
+  user_id  Int      @id @default(autoincrement()) @db.UnsignedInt
+  username String   @db.VarChar(255)
+  password String   @db.VarChar(255)
+  profile  profile?
+}

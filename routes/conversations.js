@@ -1,15 +1,23 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-/* GET conversations for a user */
-router.get('/', function(req, res, next) {
-  const data = []; // Placeholder
-  res.json(data);
+router.get('/', async (req, res, next) => {
+  try {
+    const conversations = await prisma.conversations.findMany();
+    res.json(conversations);
+  } catch (error) {
+    next(error);
+  }
 });
 
-/* POST to create a new conversation (optional) */
-router.post('/', (req, res, next) => {
-  res.send("Conversation created (placeholder)");
+router.post('/', async (req, res, next) => {
+  try {
+    res.send("Conversation created (placeholder)");
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

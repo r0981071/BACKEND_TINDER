@@ -1,16 +1,24 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-/* GET all users */
-router.get('/', function(req, res, next) {
-  const data = []; // Placeholder: will fetch users later with Prisma
-  res.json(data);
+router.get('/', async (req, res, next) => {
+  try {
+    const users = await prisma.user.findMany();
+    res.json(users);
+  } catch (error) {
+    next(error);
+  }
 });
 
-/* POST create a new user + profile */
-router.post('/', (req, res, next) => {
-  res.send("User + profile created (placeholder)");
+router.post('/', async (req, res, next) => {
+  try {
+    // logic will go here later
+    res.send("User + profile created (placeholder)");
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;
-

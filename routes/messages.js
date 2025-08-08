@@ -1,15 +1,23 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-/* GET messages for a conversation */
-router.get('/', function(req, res, next) {
-  const data = []; // Placeholder
-  res.json(data);
+router.get('/', async (req, res, next) => {
+  try {
+    const messages = await prisma.messages.findMany();
+    res.json(messages);
+  } catch (error) {
+    next(error);
+  }
 });
 
-/* POST a new message */
-router.post('/', (req, res, next) => {
-  res.send("Message sent (placeholder)");
+router.post('/', async (req, res, next) => {
+  try {
+    res.send("Message sent (placeholder)");
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;
