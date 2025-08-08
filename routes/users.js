@@ -13,19 +13,30 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-// Check existing username (SIGNUP)
-router.post('/check-username', async (req, res, next) => {
+router.post('/', async (req, res, next) => {
   try {
-    const { username } = req.body;
+    const { username, password } = req.body;
+
+    // This replaces the need for /check-username
     const existingUser = await prisma.user.findUnique({
       where: { username }
     });
 
-    res.json({ exists: !!existingUser });
+    if (existingUser) {
+      return res.status(409).json({ error: "Username already exists" });
+    }
+
+    // Create the user
+    const newUser = await prisma.user.create({
+      data: { username, password }
+    });
+
+    res.status(201).json({ success: true, user_id: newUser.user_id });
   } catch (error) {
     next(error);
   }
 });
+
 
 // Check username + password match (LOGIN)
 router.post('/login', async (req, res, next) => {
