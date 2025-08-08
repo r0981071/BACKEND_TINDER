@@ -3,18 +3,79 @@ const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-router.get('/', async (req, res, next) => {
+// GET a profile by ID
+router.get('/:id', async (req, res, next) => {
   try {
-    const profiles = await prisma.profile.findMany();
-    res.json(profiles);
+    const id = parseInt(req.params.id);
+
+    const profile = await prisma.profile.findUnique({
+      where: { profile_id: id }
+    });
+
+    if (!profile) {
+      return res.status(404).json({ message: 'Profile not found' });
+    }
+
+    res.json(profile);
   } catch (error) {
     next(error);
   }
 });
 
+// POST create or update profile safely
 router.post('/', async (req, res, next) => {
   try {
-    res.send("Profile created/updated (placeholder)");
+    const {
+      profile_id,
+      name,
+      gender_male,
+      age,
+      nationallity,
+      height,
+      weight,
+      bio,
+      profile_pic_url
+    } = req.body;
+
+    const existingProfile = await prisma.profile.findUnique({
+      where: { profile_id }
+    });
+
+    let result;
+
+    if (existingProfile) {
+      // Update only the fields that are provided (non-undefined)
+      result = await prisma.profile.update({
+        where: { profile_id },
+        data: {
+          ...(name !== undefined && { name }),
+          ...(gender_male !== undefined && { gender_male }),
+          ...(age !== undefined && { age }),
+          ...(nationallity !== undefined && { nationallity }),
+          ...(height !== undefined && { height }),
+          ...(weight !== undefined && { weight }),
+          ...(bio !== undefined && { bio }),
+          ...(profile_pic_url !== undefined && { profile_pic_url })
+        }
+      });
+    } else {
+      // Create full profile (all fields must be included)
+      result = await prisma.profile.create({
+        data: {
+          profile_id, // FK to user_id
+          name,
+          gender_male,
+          age,
+          nationallity,
+          height,
+          weight,
+          bio,
+          profile_pic_url
+        }
+      });
+    }
+
+    res.json(result);
   } catch (error) {
     next(error);
   }
