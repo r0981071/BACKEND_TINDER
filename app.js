@@ -22,6 +22,8 @@ const swipesRouter = require('./routes/swipes');
 const matchesRouter = require('./routes/matches');
 const messagesRouter = require('./routes/messages');
 const conversationsRouter = require('./routes/conversations');
+const adminRouter = require('./routes/admin');
+
 
 app.use('/', indexRouter);//just in case index
 app.use('/api/users', userRouter);
@@ -30,11 +32,11 @@ app.use('/api/swipes', swipesRouter);
 app.use('/api/matches', matchesRouter);
 app.use('/api/messages', messagesRouter);
 app.use('/api/conversations', conversationsRouter);
+app.use('/api/admin', adminRouter);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-
 
 
 
