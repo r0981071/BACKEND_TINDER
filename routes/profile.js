@@ -3,6 +3,32 @@ const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+// GET profiles the user hasn't swiped on yet
+router.get('/for-swipe/:userId', async (req, res, next) => {
+  try {
+    const userId = parseInt(req.params.userId);
+
+    const swipedIds = await prisma.swipes.findMany({
+      where: { swiper_id: userId },
+      select: { swiped_id: true }
+    });
+
+    const swipedIdList = swipedIds.map(entry => entry.swiped_id);
+
+    const profilesToSwipe = await prisma.profile.findMany({
+      where: {
+        profile_id: {
+          notIn: [userId, ...swipedIdList]  // exclude self + already swiped
+        }
+      }
+    });
+
+    res.json(profilesToSwipe);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // GET a profile by ID
 router.get('/:id', async (req, res, next) => {
   try {
@@ -82,31 +108,7 @@ router.post('/', async (req, res, next) => {
 });
 
 
-// GET profiles the user hasn't swiped on yet
-router.get('/for-swipe/:userId', async (req, res, next) => {
-  try {
-    const userId = parseInt(req.params.userId);
 
-    const swipedIds = await prisma.swipes.findMany({
-      where: { swiper_id: userId },
-      select: { swiped_id: true }
-    });
-
-    const swipedIdList = swipedIds.map(entry => entry.swiped_id);
-
-    const profilesToSwipe = await prisma.profile.findMany({
-      where: {
-        profile_id: {
-          notIn: [userId, ...swipedIdList]  // exclude self + already swiped
-        }
-      }
-    });
-
-    res.json(profilesToSwipe);
-  } catch (error) {
-    next(error);
-  }
-});
 
 
 module.exports = router;
