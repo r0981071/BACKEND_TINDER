@@ -8,31 +8,45 @@ datasource db {
 }
 
 model conversations {
-  conversation_id Int @id @default(autoincrement()) @db.UnsignedInt
-  user1_id        Int
-  user2_id        Int
+  conversation_id                   Int        @id @default(autoincrement()) @db.UnsignedInt
+  user1_id                          Int        @db.UnsignedInt
+  user2_id                          Int        @db.UnsignedInt
+  user_conversations_user1_idTouser user       @relation("conversations_user1_idTouser", fields: [user1_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "conversations_ibfk_1")
+  user_conversations_user2_idTouser user       @relation("conversations_user2_idTouser", fields: [user2_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "conversations_ibfk_2")
+  messages                          messages[]
 
   @@unique([user1_id, user2_id], map: "unique_conversation")
+  @@index([user2_id], map: "user2_id")
 }
 
 model matches {
-  match_id Int @id @default(autoincrement()) @db.UnsignedInt
-  user1_id Int
-  user2_id Int
+  match_id                    Int  @id @default(autoincrement()) @db.UnsignedInt
+  user1_id                    Int  @db.UnsignedInt
+  user2_id                    Int  @db.UnsignedInt
+  user_matches_user2_idTouser user @relation("matches_user2_idTouser", fields: [user2_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "matches_ibfk_1")
+  user_matches_user1_idTouser user @relation("matches_user1_idTouser", fields: [user1_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "matches_ibfk_2")
 
   @@unique([user1_id, user2_id], map: "unique_match")
+  @@index([user2_id], map: "user2_id")
 }
 
 model messages {
-  message_id      Int    @id @default(autoincrement()) @db.UnsignedInt
-  conversation_id Int
-  sender_id       Int
-  receiver_id     Int
-  content         String @db.VarChar(255)
+  message_id                      Int           @id @default(autoincrement()) @db.UnsignedInt
+  conversation_id                 Int           @db.UnsignedInt
+  sender_id                       Int           @db.UnsignedInt
+  receiver_id                     Int           @db.UnsignedInt
+  content                         String        @db.VarChar(255)
+  user_messages_sender_idTouser   user          @relation("messages_sender_idTouser", fields: [sender_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "messages_ibfk_1")
+  user_messages_receiver_idTouser user          @relation("messages_receiver_idTouser", fields: [receiver_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "messages_ibfk_2")
+  conversations                   conversations @relation(fields: [conversation_id], references: [conversation_id], onDelete: NoAction, onUpdate: NoAction, map: "messages_ibfk_3")
+
+  @@index([conversation_id], map: "conversation_id")
+  @@index([receiver_id], map: "receiver_id")
+  @@index([sender_id], map: "sender_id")
 }
 
 model profile {
-  profile_id      Int     @id @default(autoincrement()) @db.UnsignedInt
+  profile_id      Int     @id @db.UnsignedInt
   name            String  @db.VarChar(255)
   gender_male     Boolean
   age             Int
@@ -45,17 +59,28 @@ model profile {
 }
 
 model swipes {
-  swipe_id  Int     @id @default(autoincrement()) @db.UnsignedInt
-  swiper_id Int
-  swiped_id Int
-  is_like   Boolean
+  swipe_id                    Int     @id @default(autoincrement()) @db.UnsignedInt
+  swiper_id                   Int     @db.UnsignedInt
+  swiped_id                   Int     @db.UnsignedInt
+  is_like                     Boolean
+  user_swipes_swiped_idTouser user    @relation("swipes_swiped_idTouser", fields: [swiped_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "swipes_ibfk_1")
+  user_swipes_swiper_idTouser user    @relation("swipes_swiper_idTouser", fields: [swiper_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "swipes_ibfk_2")
 
   @@unique([swiper_id, swiped_id], map: "unique_swipe")
+  @@index([swiped_id], map: "swiped_id")
 }
 
 model user {
-  user_id  Int      @id @default(autoincrement()) @db.UnsignedInt
-  username String   @unique(map: "username") @db.VarChar(255)
-  password String   @db.VarChar(255)
-  profile  profile?
+  user_id                                    Int             @id @default(autoincrement()) @db.UnsignedInt
+  username                                   String          @unique(map: "username") @db.VarChar(255)
+  password                                   String          @db.VarChar(255)
+  conversations_conversations_user1_idTouser conversations[] @relation("conversations_user1_idTouser")
+  conversations_conversations_user2_idTouser conversations[] @relation("conversations_user2_idTouser")
+  matches_matches_user2_idTouser             matches[]       @relation("matches_user2_idTouser")
+  matches_matches_user1_idTouser             matches[]       @relation("matches_user1_idTouser")
+  messages_messages_sender_idTouser          messages[]      @relation("messages_sender_idTouser")
+  messages_messages_receiver_idTouser        messages[]      @relation("messages_receiver_idTouser")
+  profile                                    profile?
+  swipes_swipes_swiped_idTouser              swipes[]        @relation("swipes_swiped_idTouser")
+  swipes_swipes_swiper_idTouser              swipes[]        @relation("swipes_swiper_idTouser")
 }
