@@ -7,6 +7,7 @@ const cors = require('cors');
 
 const app = express();
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));//for img uploads
 app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
@@ -28,6 +29,7 @@ const adminRouter = require('./routes/admin');
 
 
 app.use('/', indexRouter);//just in case index
+app.use('/api/uploads', require('./routes/uploads'));//for img uploads
 app.use('/api/users', userRouter);
 app.use('/api/profiles', profileRouter);
 app.use('/api/swipes', swipesRouter);
