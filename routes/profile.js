@@ -3,31 +3,46 @@ const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// GET profiles the user hasn't swiped on yet
+// GET profiles the user hasn't swiped on yet (optionally filtered)
 router.get('/for-swipe/:userId', async (req, res, next) => {
   try {
     const userId = parseInt(req.params.userId);
 
+    // Optional filters from query
+    const { gender, minAge, maxAge } = req.query;
+    // gender: "male" | "female" | undefined
+    // minAge/maxAge: strings -> numbers
+    const min = Number.isFinite(+minAge) ? parseInt(minAge) : null;
+    const max = Number.isFinite(+maxAge) ? parseInt(maxAge) : null;
+
+    // ids you already swiped (to exclude)
     const swipedIds = await prisma.swipes.findMany({
       where: { swiper_id: userId },
       select: { swiped_id: true }
     });
+    const swipedIdList = swipedIds.map(e => e.swiped_id);
 
-    const swipedIdList = swipedIds.map(entry => entry.swiped_id);
+    // Build Prisma where dynamically
+    const where = {
+      profile_id: { notIn: [userId, ...swipedIdList] }
+    };
 
-    const profilesToSwipe = await prisma.profile.findMany({
-      where: {
-        profile_id: {
-          notIn: [userId, ...swipedIdList]  // exclude self + already swiped
-        }
-      }
-    });
+    if (gender === 'male') where.gender_male = true;
+    if (gender === 'female') where.gender_male = false;
 
+    if (min !== null || max !== null) {
+      where.age = {};
+      if (min !== null) where.age.gte = min;
+      if (max !== null) where.age.lte = max;
+    }
+
+    const profilesToSwipe = await prisma.profile.findMany({ where });
     res.json(profilesToSwipe);
   } catch (error) {
     next(error);
   }
 });
+
 
 // GET a profile by ID
 router.get('/:id', async (req, res, next) => {
