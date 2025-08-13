@@ -45,14 +45,36 @@ router.post('/users/:userId/password', isAdmin, async (req, res, next) => {
   try {
     const userId = parseInt(req.params.userId);
     const { new_password } = req.body;
-    if (!new_password) return res.status(400).json({ error: 'new_password is required' });
+
+    if (!new_password) {
+      return res.status(400).json({ error: 'new password is required' });
+    }
+
+    // Fetch current password to compare
+    const existing = await prisma.user.findUnique({
+      where: { user_id: userId },
+      select: { password: true }
+    });
+
+    if (!existing) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (existing.password === new_password) {
+      return res.status(400).json({ error: 'New password must be different from the old one' });
+    }
+
     const updated = await prisma.user.update({
       where: { user_id: userId },
       data: { password: new_password }
     });
+
     res.json({ success: true, user_id: updated.user_id });
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 });
+
 
 // DELETE USER + RELATED DATA (already added earlier)
 router.delete('/users/:userId', isAdmin, async (req, res, next) => {
